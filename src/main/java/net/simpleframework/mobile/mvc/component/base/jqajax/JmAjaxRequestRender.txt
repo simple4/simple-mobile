@@ -1,0 +1,67 @@
+/**
+ * shihb
+ * 异步模板
+ */
+var ${actionFunc} = function() {
+	var parameters  = [];
+	//添加表单参数
+	$if{ajaxRequestBean.formSelector  != null}
+	    var parameters  = $("#${ajaxRequestBean.formSelector}").serializeArray();
+	$end{}
+	//添加Action 空号内的参数,如$Actions['ajaxDemo2']('ta='+$('#ta1').val())
+	var map=strTomap(arguments[0]);
+	//添加组件对象id
+	map.put('${bean_id}','${hashId}');
+	//map 参数加入到组件中
+	map.each(function(key,value){
+		parameters[parameters.length]={name:key,value:value};
+	});
+	//执行异步前操作
+	$if{ajaxRequestBean.handleBefore != null}
+	${ajaxRequestBean.handleBefore}
+	$end{} 
+    //提示信息 parameters[]
+    $if{ajaxRequestBean.confirmMessage  != null}
+	if(!confirm(${ajaxRequestBean.confirmMessage}))return;
+	$end{}
+	$.ajax({
+		type: "POST",
+		url: "${resourceHomePath}/jsp/ajax_request.jsp",
+		data: parameters,
+		dataType:"json",
+		cache:${ajaxRequestBean.updateContainerCache},
+		success: function(msg){
+			var ${ajaxRequestBean.cbDataName}=null;//存放放回数据名字
+			if(msg.isJSON){//msg.rt是json数据
+				${ajaxRequestBean.cbDataName} = evalJSON(msg.rt);
+			}else if (msg.isJavascript){
+			   $eval(msg.rt);
+			}else{
+			   if(msg.id){//替换dom的id为msg.id的节点内容
+					$("#"+msg.id).html(msg.rt);
+				}
+			}
+			/*if(!msg.isJSON){//msg.rt不是json数据
+				${ajaxRequestBean.cbDataName} = msg.rt;
+				if(msg.id){//替换dom的id为msg.id的节点内容
+					$("#"+msg.id).html(msg.rt);
+				}else{
+					//alert(${ajaxRequestBean.cbDataName});
+				}
+			}else{//msg.rt是json数据
+				${ajaxRequestBean.cbDataName} = evalJSON(msg.rt);
+			}*/
+			$if{ajaxRequestBean.jsCompleteCallback  != null}
+			${ajaxRequestBean.jsCompleteCallback}
+			$else{}
+			$end{}
+		},
+		error: function(msg){
+		/*	if(confirm("")){
+				window.location.reload();
+			}*/
+		}
+	});
+	return true;
+}; 
+$Actions["${ajaxRequestBean.name}"] = ${actionFunc};

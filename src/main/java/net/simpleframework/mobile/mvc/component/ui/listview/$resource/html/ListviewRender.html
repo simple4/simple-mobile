@@ -1,0 +1,177 @@
+<ul data-role="listview"  id="@{hashId}"
+@if{listviewBean.inset!=null}
+   data-inset= "@{listviewBean.inset}"
+@end{}
+@if{listviewBean.countTheme!=null}
+   data-count-theme= "@{listviewBean.countTheme}"
+@end{}
+@if{listviewBean.headerTheme!=null}
+   data-header-theme= "@{listviewBean.headerTheme}"
+@end{}
+@if{listviewBean.dividerTheme!=null}
+   data-divider-theme= "@{listviewBean.dividerTheme}"
+@end{}
+@if{listviewBean.filter!=null}
+   data-filter= "@{listviewBean.filter}"
+@end{}
+@if{listviewBean.filterPlaceholder!=null}
+   data-filter-placeholder= "@{listviewBean.filterPlaceholder}"
+@end{}
+@if{listviewBean.filterTheme!=null}
+   data-filter-theme= "@{listviewBean.filterTheme}"
+@end{}
+@if{listviewBean.splitIcon!=null}
+  data-split-icon= "@{listviewBean.splitIcon}"
+@end{}
+@if{listviewBean.splitTheme!=null}
+  data-split-theme= "@{listviewBean.splitTheme}"
+@end{}
+@if{listviewBean.theme!=null}
+   data-theme= "@{listviewBean.theme}"
+@end{}
+>
+@code{items=listviewBean.items}
+@foreach{item : items} 
+ <li   
+    @if{item.getAttrEx("role")!=null}
+        data-role='@{item.getAttrEx("role")}'
+        role='heading'
+    >   @{item.text}  
+    @else{}
+	    @if{item.getAttrEx("theme")!=null}
+	   	data-theme= '@{item.getAttrEx("theme")}'
+	    @end{} 
+	    @if{item.getAttrEx("icon")!=null}
+	   	data-icon= '@{item.getAttrEx("icon")}'
+	    @end{}
+    > 
+		@if{listviewBean.isRead!=null && listviewBean.isRead}
+	        @if{item.getAttrEx("imgsrc")!=null}
+		    <img src="@{item.getAttrEx('imgsrc')}"></img>
+		    @end{} 
+		    @{item.text}
+	        @if{item.getAttrEx("bubble_Text")!=null}
+		     <span class="ui-li-count">
+		       @{item.getAttrEx("bubble_Text")}
+		     </span>
+		    @end{} 
+	    @else{}
+		
+	    <a
+	       @if{item.getAttrEx("href")!=null}
+		   		href= '@{item.getAttrEx("href")}'
+	       @end{}
+	       @if{item.getAttrEx("transition")!=null}
+		   		data-transition= '@{item.getAttrEx("transition")}'
+	       @end{}
+	       @if{item.getAttrEx("onclick")!=null}
+		   		onclick = '@{item.getAttrEx("onclick")}'
+	       @end{} 
+	       >
+	       @if{item.getAttrEx("imgsrc")!=null}
+		    <img src="@{item.getAttrEx('imgsrc')}"></img>
+		   @end{} 
+	       @{item.text}
+		   @if{item.getAttrEx("bubble_Text")!=null}
+		     <span class="ui-li-count">
+		       @{item.getAttrEx("bubble_Text")}
+		     </span>
+		   @end{}   
+	     </a>			 
+	     @end{}
+		 @if{item.getAttrEx("splithref")!=null}
+			  <a href="@{item.getAttrEx('splithref')}"></a>
+		 @end{} 
+    @end{}
+	</li>
+@end{}
+</ul>
+@if{listviewBean.jsonUri!=null}
+<div id="@{hashId}_footer"  class="listviewloading" >
+	<span class="listviewicon" style="display:none"></span>
+</div>
+<script type="text/javascript">
+    
+        $(document).bind("ready", function(){
+			
+           $('#@{hashId}_footer').waypoint(function (a, b) {
+                if(b=="down"){
+			    $('#@{hashId}_footer .listviewicon').css('display','block');
+				var list = 	$("#@{hashId}");
+				var tpdivider,tpbutton;
+				var isRead = "@{listviewBean.isRead}";
+				$.ajax({
+				   type: "POST",
+				   url: window.CONTEXT_PATH+"@{listviewBean.jsonUri}",
+				   data: "@{listviewBean.jsonUriData}",
+				   success: function(data){
+				   	if(data&&data!=undefined){
+						data = $eval("("+data+")");
+					//	 list.empty();	
+				  		 $.each(data.items, function(i, item){						 	
+						 	if (item.attrEx["role"]) {
+								tpdivider = "<li data-role='"+item.attrEx["role"]+"'  role='heading'";
+								tpdivider += ">"+item.text+"</li>";
+								list.append(tpdivider);
+						 	}
+						 	 else {
+								tpbutton = "<li ";
+								if(item.attrEx["theme"]!=undefined){
+									tpbutton += "data-theme='"+item.attrEx["theme"]+"' ";
+								}
+								if(item.attrEx["icon"]!=undefined){
+									tpbutton += "data-icon='"+item.attrEx["icon"]+"' ";
+								}
+								tpbutton += ">";
+								
+								if(isRead=="true"){
+									if(item.attrEx["imgsrc"]!=undefined){
+									tpbutton +=	"<img src="+item.attrEx["imgsrc"]+"></img>";
+									}
+									tpbutton +=item.text;
+									if(item.attrEx["bubble_Text"]!=undefined){
+									tpbutton += " <span class=\"ui-li-count\">"+item.attrEx["bubble_Text"]+"</span>";
+									}
+								}else{
+									tpbutton +=	"<a";
+									if(item.attrEx["href"]!=undefined){
+									tpbutton += "href='"+item.attrEx["href"]+"' ";
+								    }
+									if(item.attrEx["transition"]!=undefined){
+									tpbutton += "data-transition='"+item.attrEx["transition"]+"' ";
+								    } 
+									if(item.attrEx["onclick"]!=undefined){
+									tpbutton += "onclick='"+item.attrEx["onclick"]+"' ";
+								    }
+									tpbutton += ">"
+									
+									if(item.attrEx["imgsrc"]!=undefined){
+									tpbutton +=	"<img src="+item.attrEx["imgsrc"]+"></img>";
+									}
+									tpbutton +=item.text;
+									if(item.attrEx["bubble_Text"]!=undefined){
+									tpbutton += " <span class=\"ui-li-count\">"+item.attrEx["bubble_Text"]+"</span>";
+									}
+									tpbutton +=	" </a> "
+								}
+								if(item.attrEx["splithref"]!=undefined){
+									tpbutton +=	" <a href='"+item.attrEx['splithref']+"'></a> "
+								}
+								tpbutton += "</li>";
+							 	list.append(tpbutton);
+						 	}
+							
+						 });
+						 list.listview('refresh');
+					}
+					 $('#@{hashId}_footer .listviewicon').css('display','none');
+				   }
+				});
+				
+                $('#@{hashId}_footer').waypoint({ offset: '@{listviewBean.offset!=null?listviewBean.offset:"100%"}'});
+				}								
+            }, { offset: '@{listviewBean.offset!=null?listviewBean.offset:"100%"}'});
+            
+        });
+</script>		
+@end{}
